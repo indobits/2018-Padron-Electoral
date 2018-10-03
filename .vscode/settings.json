@@ -1,0 +1,12 @@
+{
+	"editor.fontSize": 20,
+	"editor.mouseWheelZoom": true,
+
+	"python.linting.pylintEnabled": true,
+	"python.linting.pylintPath": "${workspaceFolder}/bin/pylint",
+	"python.pythonPath": "${workspaceFolder}/bin/python",
+
+	"terminal.integrated.fontSize": 18,
+
+	"window.zoomLevel": 0
+}

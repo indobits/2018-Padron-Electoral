@@ -1,0 +1,16 @@
+
+# Directories
+
+.DS_Store
+.ipynb_checkpoints
+bin
+etc
+include
+lib
+share
+
+# Files
+
+.env
+notes.txt
+pip-selfcheck.json
