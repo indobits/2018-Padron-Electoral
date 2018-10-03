@@ -74,12 +74,12 @@ import random,sys
 
 i = 40000000
 while i < 50000000:
-	print(i)
+	print('DNI: {0}'.format(i))
 	#proxies = cycle(get_proxies()); proxy = next(proxies); print(proxy)
-	proxies = get_proxies(); index = random.randint(0,len(proxies)-1); proxy = proxies[index]; print(proxy)
+	proxies = get_proxies(); index = random.randint(0,len(proxies)-1); proxy = proxies[index]; print('Proxy: {0}'.format(proxy))
 	try:
 		res = req.post('https://padron.americatv.com.pe',data={'dni':str(i).zfill(8)},proxies={'https':proxy})
-		print(res.ok)
+		print('Status: {0}'.format(res.ok))
 		soup = bs(res.text,'html.parser')
 		if(soup.find(id='nameData')):
 			name = soup.find(id='nameData').get('value')
