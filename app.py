@@ -80,15 +80,15 @@ stmt = stg_persons.select().with_only_columns([func.max(stg_persons.c.dni)])
 dniMax = connection.execute(stmt).scalar()
 if(dniMax): dniMax = int(dniMax) + 1
 
-i = dniMax or 1
+i = dniMax or 0
 while i < 99999999:
 	print('-' * 50)
 	print('Fecha y Hora: {0}'.format(time.strftime('%Y-%m-%d %H:%M:%S')))
-	print('DNI: {0}'.format(i))
 	#proxies = cycle(get_proxies()); proxy = next(proxies); print(proxy)
 	proxies = get_proxies(); index = random.randint(0,len(proxies)-1); proxy = proxies[index]; print('Proxy: {0}'.format(proxy))
 	try:
-		res = req.post('https://padron.americatv.com.pe',data={'dni':str(i).zfill(8)},proxies={'https':proxy},timeout=(3,5))
+		dni = str(i).zfill(8); print('DNI: {0}'.format(dni))
+		res = req.post('https://padron.americatv.com.pe',data={'dni':dni},proxies={'https':proxy},timeout=(3,5),verify=None)
 		print('Passed: {0}'.format(res.ok))
 		soup = bs(res.text,'html.parser')
 		if(soup.find(id='nameData')):
