@@ -39,13 +39,15 @@ connection = engine.connect()
 
 # Create Table
 
-from sqlalchemy import Column,MetaData,Table,VARCHAR
+from sqlalchemy import Column,func,MetaData,Table,DateTime,VARCHAR
 metadata = MetaData()
 
 stg_persons = Table('stg_persons',metadata,
+	Column('dni',VARCHAR(1000)),
 	Column('name',VARCHAR(1000)),
-	Column('lastname',VARCHAR(1000)),
-	Column('dni',VARCHAR(1000)))
+	Column('lastName',VARCHAR(1000)),
+	Column('createdAt',DateTime(timezone=True),server_default=func.now())
+)
 metadata.create_all(engine)
 #print(engine.table_names())
 
@@ -70,10 +72,16 @@ def get_proxies():
 
 #proxy_pool = cycle(proxies)#; pprint(proxy_pool)
 
-import random,sys
+import random,sys,time
 
-i = 40000000
+# pylint: disable=E1111
+stmt = stg_persons.select().with_only_columns([func.max(stg_persons.c.dni)])
+dniMax = connection.execute(stmt).scalar()
+
+i = dniMax or 40000000
 while i < 50000000:
+	print('-' * 50)
+	print('Fecha y Hora: {0}'.format(time.strftime('%Y-%m-%d %H:%M:%S')))
 	print('DNI: {0}'.format(i))
 	#proxies = cycle(get_proxies()); proxy = next(proxies); print(proxy)
 	proxies = get_proxies(); index = random.randint(0,len(proxies)-1); proxy = proxies[index]; print('Proxy: {0}'.format(proxy))
@@ -82,12 +90,13 @@ while i < 50000000:
 		print('Status: {0}'.format(res.ok))
 		soup = bs(res.text,'html.parser')
 		if(soup.find(id='nameData')):
-			name = soup.find(id='nameData').get('value')
-			lastname = soup.find(id='lastnameData').get('value')
 			dni = soup.find(id='dniData').get('value')
+			name = soup.find(id='nameData').get('value')
+			lastName = soup.find(id='lastnameData').get('value')
 			# pylint: disable=E1120
-			stmt = stg_persons.insert().values(name=name,lastname=lastname,dni=dni)
+			stmt = stg_persons.insert().values(dni=dni,name=name,lastName=lastName)
 			connection.execute(stmt)
 		i += 1
 	except:
 		print(sys.exc_info())
+		continue
