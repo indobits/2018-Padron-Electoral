@@ -80,8 +80,8 @@ stmt = stg_persons.select().with_only_columns([func.max(stg_persons.c.dni)])
 dniMax = connection.execute(stmt).scalar()
 if(dniMax): dniMax = int(dniMax) + 1
 
-i = dniMax or 40000000
-while i < 50000000:
+i = dniMax or 1
+while i < 99999999:
 	print('-' * 50)
 	print('Fecha y Hora: {0}'.format(time.strftime('%Y-%m-%d %H:%M:%S')))
 	print('DNI: {0}'.format(i))
