@@ -66,7 +66,8 @@ def get_proxies():
 		tds = tr.findAll('td')#; tds and print(tds)
 		tds and proxies.append([td.text for i,td in enumerate(tds) if(i in(0,1,3,6))])
 
-	proxies = list(filter(lambda proxy: proxy[2] in('Brazil','Colombia','Peru') and proxy[3] == 'yes', proxies))
+	#proxies = list(filter(lambda proxy: proxy[2] in('Brazil','Colombia','Peru') and proxy[3] == 'yes', proxies))
+	proxies = list(filter(lambda proxy: proxy[3] == 'yes', proxies))
 	proxies = ["{0}:{1}".format(proxy[0],proxy[1]) for proxy in proxies]
 	return proxies
 
@@ -77,6 +78,7 @@ import random,sys,time
 # pylint: disable=E1111
 stmt = stg_persons.select().with_only_columns([func.max(stg_persons.c.dni)])
 dniMax = connection.execute(stmt).scalar()
+if(dniMax): dniMax = int(dniMax) + 1
 
 i = dniMax or 40000000
 while i < 50000000:
@@ -86,8 +88,8 @@ while i < 50000000:
 	#proxies = cycle(get_proxies()); proxy = next(proxies); print(proxy)
 	proxies = get_proxies(); index = random.randint(0,len(proxies)-1); proxy = proxies[index]; print('Proxy: {0}'.format(proxy))
 	try:
-		res = req.post('https://padron.americatv.com.pe',data={'dni':str(i).zfill(8)},proxies={'https':proxy})
-		print('Status: {0}'.format(res.ok))
+		res = req.post('https://padron.americatv.com.pe',data={'dni':str(i).zfill(8)},proxies={'https':proxy},timeout=(3,5))
+		print('Passed: {0}'.format(res.ok))
 		soup = bs(res.text,'html.parser')
 		if(soup.find(id='nameData')):
 			dni = soup.find(id='dniData').get('value')
@@ -96,7 +98,7 @@ while i < 50000000:
 			# pylint: disable=E1120
 			stmt = stg_persons.insert().values(dni=dni,name=name,lastName=lastName)
 			connection.execute(stmt)
+			print('DNI grabado exitosamente')
 		i += 1
 	except:
 		print(sys.exc_info())
-		continue
