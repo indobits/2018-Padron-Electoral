@@ -14,6 +14,7 @@ mysql_pass = os.getenv('MYSQL_PASS')
 mysql_host = os.getenv('MYSQL_HOST')
 mysql_port = os.getenv('MYSQL_PORT')
 mysql_db = os.getenv('MYSQL_DB')
+proxy_act = int(os.getenv('PROXY_ACT'))
 
 # Work
 
@@ -71,8 +72,6 @@ def get_proxies():
 	proxies = ["{0}:{1}".format(proxy[0],proxy[1]) for proxy in proxies]
 	return proxies
 
-#proxy_pool = cycle(proxies)#; pprint(proxy_pool)
-
 import random,sys,time
 
 # pylint: disable=E1111
@@ -84,11 +83,16 @@ i = dniMax or 0
 while i < 99999999:
 	print('-' * 50)
 	print('Fecha y Hora: {0}'.format(time.strftime('%Y-%m-%d %H:%M:%S')))
-	#proxies = cycle(get_proxies()); proxy = next(proxies); print(proxy)
-	proxies = get_proxies(); index = random.randint(0,len(proxies)-1); proxy = proxies[index]; print('Proxy: {0}'.format(proxy))
 	try:
 		dni = str(i).zfill(8); print('DNI: {0}'.format(dni))
-		res = req.post('https://padron.americatv.com.pe',data={'dni':dni},proxies={'https':proxy},timeout=(3,5),verify=None)
+		if(proxy_act):
+			proxies = get_proxies()
+			index = random.randint(0,len(proxies)-1)
+			proxy = proxies[index]
+			print('Proxy: {0}'.format(proxy))
+			res = req.post('https://padron.americatv.com.pe',data={'dni':dni},proxies={'https':proxy},timeout=(1,1),verify=None)
+		else:
+			res = req.post('https://padron.americatv.com.pe',data={'dni':dni},timeout=(1,1),verify=None)
 		print('Passed: {0}'.format(res.ok))
 		soup = bs(res.text,'html.parser')
 		if(soup.find(id='nameData')):
