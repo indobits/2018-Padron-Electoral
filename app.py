@@ -75,28 +75,28 @@ def get_proxies():
 	proxies = ["{0}:{1}".format(proxy[0],proxy[1]) for proxy in proxies]
 	return proxies
 
-import random,sys,time
+# Store
 
-# pylint: disable=E1111
-stmt = stg_persons.select().with_only_columns([func.max(stg_persons.c.dni)])
-dniMax = connection.execute(stmt).scalar()
-if(dniMax): dniMax = int(dniMax) + 1
+import random,sys,time,traceback
 
-i = dniMax or 0
-while i < 99999999:
-	print('-' * 50)
-	print('Fecha y Hora: {0}'.format(time.strftime('%Y-%m-%d %H:%M:%S')))
+filename = os.path.splitext(os.path.basename(__file__))
+f = open('{0}.log'.format(filename[0]),'a')
+
+def store(dni):
+	print('-'*50,file=f)
+	print('Fecha y Hora: {0}'.format(time.strftime('%Y-%m-%d %H:%M:%S')),file=f)
 	try:
-		dni = str(i).zfill(8); print('DNI: {0}'.format(dni))
+		dni = str(dni).zfill(8); print('DNI: {0}'.format(dni),file=f)
 		if(proxy_act):
 			proxies = get_proxies()
 			index = random.randint(0,len(proxies)-1)
 			proxy = proxies[index]
-			print('Proxy: {0}'.format(proxy))
+			print('Proxy: {0}'.format(proxy),file=f)
 			res = req.post('https://padron.americatv.com.pe',data={'dni':dni},proxies={'https':proxy},timeout=(1,1),verify=None)
 		else:
-			res = req.post('https://padron.americatv.com.pe',data={'dni':dni},timeout=(1,1),verify=None)
-		print('Passed: {0}'.format(res.ok))
+			res = req.post('https://padron.americatv.com.pe',data={'dni':dni},timeout=(10),verify=None)
+
+		print('Passed: {0}'.format(res.ok),file=f)
 		soup = bs(res.text,'html.parser')
 		if(soup.find(id='nameData')):
 			dni = soup.find(id='dniData').get('value')
@@ -105,10 +105,57 @@ while i < 99999999:
 			# pylint: disable=E1120
 			stmt = stg_persons.insert().values(dni=dni,name=name,lastName=lastName)
 			connection.execute(stmt)
-			print('DNI grabado exitosamente')
-		i += 1
-	except:
-		print(sys.exc_info())
+			print('DNI grabado exitosamente',file=f)
+	except Exception as e:
+		print(e,file=sys.stderr)
+		#traceback.print_exc()
+		print('DNI failed: {0}'.format(dni))
+		store(dni)
 
-elapsed_time = datetime.now() - start_time
-print('Elapsed Time (hh:mm:ss.ms) {}'.format(elapsed_time))
+# tail
+
+import subprocess
+
+def tail(f,n):
+	proc = subprocess.Popen(args=['tail','-{0}'.format(n),f],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+	lines = proc.stdout.readlines()
+	return lines
+
+# Multiprocessing
+
+from math import ceil
+import multiprocessing
+from multiprocessing import Pool
+
+def main():
+	# CPUs
+	cpus = multiprocessing.cpu_count()
+
+	# DNIs
+	# pylint: disable=E1111
+	stmt = stg_persons.select().with_only_columns([func.max(stg_persons.c.dni)])
+	dniMax = connection.execute(stmt).scalar()
+	if(dniMax): dniMax = int(dniMax) + 1
+	dni = dniMax or 0
+	dnis = range(dni,10000000)
+	dnis = range(10)
+
+	# Pool
+	print('*'*50,file=f)
+	p = Pool(processes=cpus)
+	p.map(func=store,iterable=dnis,chunksize=ceil(len(dnis)/cpus))
+	p.terminate()
+	p.join()
+
+	end_time = datetime.now()
+	elapsed_time = end_time - start_time
+	print('Start Time: {0}'.format(start_time),file=f)
+	print('End Time: {0}'.format(end_time),file=f)
+	print('Elapsed Time (hh:mm:ss.ms): {0}'.format(elapsed_time),file=f)
+	f.close()
+	print(*tail('{0}.log'.format(filename[0]),3),sep='\n')
+
+# main
+
+if(__name__ == '__main__'):
+	main()

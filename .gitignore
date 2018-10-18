@@ -11,6 +11,8 @@ share
 
 # Files
 
+*.log
 .env
 notes.txt
 pip-selfcheck.json
+test*.py
