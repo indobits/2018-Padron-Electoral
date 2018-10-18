@@ -1,4 +1,7 @@
 
+from datetime import datetime
+start_time = datetime.now()
+
 # .env
 
 from dotenv import load_dotenv
@@ -106,3 +109,6 @@ while i < 99999999:
 		i += 1
 	except:
 		print(sys.exc_info())
+
+elapsed_time = datetime.now() - start_time
+print('Elapsed Time (hh:mm:ss.ms) {}'.format(elapsed_time))
