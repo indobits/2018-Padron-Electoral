@@ -16,16 +16,5 @@
 (2018-Padron-Electoral) ➜ 2018-Padron-Electoral sudo apt update
 (2018-Padron-Electoral) ➜ 2018-Padron-Electoral sudo apt install libmysqlclient-dev
 (2018-Padron-Electoral) ➜ 2018-Padron-Electoral pip install -r requirements.txt
-```
-
-## For Shell
-
-```
 (2018-Padron-Electoral) ➜ 2018-Padron-Electoral python app.py
-```
-
-## For Jupyter
-
-```
-(2018-Padron-Electoral) ➜ 2018-Padron-Electoral jupyter notebook --config jupyter_notebook_config.py
 ```
