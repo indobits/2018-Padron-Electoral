@@ -3,7 +3,7 @@
 
 The political party "Podemos Perú" was registered presenting almost 1 million 300 thousand signatures to the Organización Nacional de Procesos Electorales (ONPE). However, some adherents say they never signed the planillon.
 
-![padron.png](https://github.com/indobits/2018-Padron-Electoral/raw/master/img/web.png "Padrón")
+![padron.png](https://github.com/indobits/2018-Padron-Electoral/raw/master/img/padron.png "Padrón")
 
 ## Configuration
 
