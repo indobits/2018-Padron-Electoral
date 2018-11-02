@@ -5,5 +5,5 @@ pip-autoremove==0.9.1
 pipdeptree==0.13.1
 pylint==2.1.1
 python-dotenv==0.9.1
-requests==2.19.1
+requests==2.20.0
 sqlalchemy==1.2.12
